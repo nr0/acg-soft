@@ -93,8 +93,7 @@ var ptspol; //pontos de um polígono.
 var npts; //num de pontos.
 
 //Recorte de retas
-var lbr;
-
+var segsReta = [];
 
 //Recorte de poligonos
 
@@ -595,7 +594,7 @@ function doMouseDown(event) {
 			ctx.beginPath();
 			//primeiro ponto
 			ctx.moveTo(canvas_x, canvas_y);
-			document.getElementById("temp").innerHTML = "Selecione o segundo ponto<br>" + "x = "+ canvas_x + "<br>y = " + canvas_y;
+			document.getElementById("temp").innerHTML = "Introduzir Segmentos de Reta<br><br>Selecione o segundo ponto<br>" + "x = "+ canvas_x + "<br>y = " + canvas_y;
 			
 			estado = 131;
 			break;
@@ -1153,7 +1152,7 @@ function menu_recorte_LiangBarsky(){
 	}
 	else{
 		estado=130;
-		document.getElementById("temp").innerHTML = "Selecione o primeiro ponto<br>" + document.getElementById("temp").innerHTML;
+		document.getElementById("temp").innerHTML = "Introduzir Segmentos de Reta<br><br>Selecione o primeiro ponto<br>" + document.getElementById("temp").innerHTML;
 	}
 }
 
