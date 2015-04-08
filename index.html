@@ -1,131 +1,94 @@
-<!--
-   index.html
-   
-   Copyright 2014 Pedro <jpedro@noblepath>
-   
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-   
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-   MA 02110-1301, USA.
-   
-   
--->
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-
-<head>
-	<title>Métodos elementares em Computação Gráfica</title>
-	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
-	<meta name="generator" content="Geany 0.21" />
-
-        <link rel='stylesheet' type='text/css' href='styles.css' />
-	<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
-	<script type='text/javascript' src='menu_jquery.js'></script>	
-
-	<link rel="stylesheet" type="text/css" href="acg.css">
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Métodos elementares em Computação Gráfica</title>
+		
+		<meta  charset="utf-8" />
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+		
+   	<link rel='stylesheet' type='text/css' href='styles.css' />
+   	<link rel="stylesheet" type="text/css" href="acg.css">
+   	
+		<!-- <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script> -->
+		<script src="lib/jquery-2.1.1.js" > </script> <!-- esta linha substitui a de cima -->
+		<script type='text/javascript' src='menu_jquery.js'></script>
+		<script src="acg.js"></script>
 	
-	<script src="acg.js"></script>
-
-</head>
-
-
-<body onload=initialize()>
-
-
-<div id='cssmenu'>
-<ul>
-   <li class='active'><a href='#' onclick='menu_limpar();'><span>Limpar Tela</span></a></li>
-   <li class='has-sub'><a href='#'><span>Segmentos de reta</span></a>
-      <ul>
-         <li><a href="#" onclick='menu_reta_declive();'>Método do declive</a></li>
-         <li><a href="#" onclick='menu_reta_DDA();'>Método DDA</a></li>
-         <li class='last'><a href='#' onclick='menu_reta_Bresenham();'><span>Método de Bresenham</span></a></li>
-      </ul>
-   </li>
-   <li class='has-sub'><a href='#'><span>Circunferência</span></a>
-      <ul>
-         <li><a href="#" onclick='menu_circ_polinomial();'>Método polinomial</a></li>
-         <li><a href="#" onclick='menu_circ_trig();'>Método trigonométrico</a></li>
-         <li class='last'><a href='#' onclick='menu_circ_bresenham();'><span>Método de Bresenham</span></a></li>
-      </ul>
-   </li>
-   <li class='has-sub'><a href='#'><span>Elipse</span></a>
-      <ul>
-         <li><a href="#" onclick='menu_elipse_polinomial();'>Método polinomial</a></li>
-         <li class='last'><a href="#" onclick='menu_elipse_trig();'>Método trigonométrico</a></li>
-      </ul>
-   </li>
-   <li class='has-sub'><a href='#'><span>Preenchimento (raster)</span></a>
-      <ul>
-         <li><a href='#' onclick='menu_pixel_info();'><span>Informação de um pixel</span></a></li>
-         <li><a href='#' onclick='menu_germen4();'><span>Gérmen "4-connected"</span></a></li>
-         <li class='last'><a href='#' onclick='menu_germen8();'><span>Gérmen "8-connected"</span></a></li>
-      </ul>
-   </li>
-   <li class='has-sub'><a href='#'><span>Polígonos</span></a>
-      <ul>
-         <li><a href='#' onclick='menu_desenha_poligono();'><span>Desenhar um polígono</span></a></li>
-         <li><a href='#' onclick='menu_varrimento();'><span>Preenchimento por Scan Line</span></a></li>
-         <li class='last'><a href='#' onclick='menu_varrimento();'><span>Recorte</span></a></li>
-      </ul>
-   </li>
-   <li class='has-sub'><a href='#'><span>Recorte</span></a>
-      <ul>
-         <li><a href='#'><span>Segmentos (Cohen-Sutherland)</span></a></li>
-         <li class='last'><a href='#'><span>Polígonos</span></a></li>
-      </ul>
-   </li>
-   <li class='has-sub'><a href='#'><span>Transformações Gráficas 2D</span></a>
-      <ul>
-         <li><a href='#'><span>Translação</span></a></li>
-         <li><a href='#'><span>Variação de Escala</span></a></li>
-         <li><a href='#'><span>Reflexão (linha)</span></a></li>
-         <li class='last'><a href='#'><span>"Linha de varrimento"</span></a></li>
-      </ul>
-   </li>
-   <li class='last'><a href='#'><span>Contact</span></a></li>
-</ul>
-</div>
-
-
-<div id="menus">
-
-</div> <!--menus-->
-
-<div id="canvaszone">
-
-
-<canvas id="acg_canvas" width="500" height="500" style="border:1px solid #000000; cursor:crosshair">
-</canvas>
-
-
-</div>
-
-
-<div id="textzone">
-<b>Descrição do algoritmo</b>
-
-<p id="description"></p>
-
-
-</div>
-
-
+	</head>
 	
-</body>
-
+	<body>
+		
+		<div id='cssmenu'>
+			<ul>
+   			<li class='active'><a href='#' onclick='menu_limpar();'><span>Limpar Tela</span></a></li>
+   			<li class='has-sub'><a href='#'><span>Segmentos de reta</span></a>
+      			<ul>
+         			<li><a href="#" onclick='menu_reta_declive();'>Método do declive</a></li>
+         			<li><a href="#" onclick='menu_reta_dda();'>Método DDA</a></li>
+         			<li class='last'><a href='#' onclick='menu_reta_bresenham();'><span>Método de Bresenham</span></a></li>
+      			</ul>
+   			</li>
+   			<li class='has-sub'><a href='#'><span>Circunferência</span></a>
+	      		<ul>
+         			<li><a href="#" onclick='menu_circ_polinomial();'>Método polinomial</a></li>
+         			<li><a href="#" onclick='menu_circ_trig();'>Método trigonométrico</a></li>
+	         		<li class='last'><a href='#' onclick='menu_circ_bresenham();'><span>Método de Bresenham</span></a></li>
+      			</ul>
+   			</li>
+   			<li class='has-sub'><a href='#'><span>Elipse</span></a>
+      			<ul>
+         			<li><a href="#" onclick='menu_elipse_polinomial();'>Método polinomial</a></li>
+         			<li class='last'><a href="#" onclick='menu_elipse_trig();'>Método trigonométrico</a></li>
+      			</ul>
+   			</li>
+   			<li class='has-sub'><a href='#'><span>Preenchimento (raster)</span></a>
+      			<ul>
+         			<li><a href='#' onclick='menu_pixel_info();'><span>Informação de um pixel</span></a></li>
+         			<li><a href='#' onclick='menu_germen4();'><span>Gérmen "4-connected"</span></a></li>
+         			<li class='last'><a href='#' onclick='menu_germen8();'><span>Gérmen "8-connected"</span></a></li>
+      			</ul>
+   			</li>
+   			<li class='has-sub'><a href='#'><span>Polígonos</span></a>
+      			<ul>
+         			<li><a href='#' onclick='menu_desenha_poligono();'><span>Desenhar um polígono</span></a></li>
+         			<li class='last'><a href='#' onclick='menu_varrimento();'><span>Preenchimento por Scan Line</span></a></li>
+      			</ul>
+   			</li>
+   			<li class='has-sub'><a href='#'><span>Recorte</span></a>
+      			<ul>
+      				<li><a href='#' onclick='menu_recorte_LiangBarsky();'><span>Segmentos (Liang-Barsky)</span></a></li>
+         			<li><a href='#' onclick='menu_recorte_CohenSutherland();'><span>Segmentos (Cohen-Sutherland)</span></a></li>
+         			<li class='last'><a href='#' onclick='menu_recorte_Poligonos();'><span>Polígonos</span></a></li>
+      			</ul>
+   			</li>
+		   	<li class='has-sub'><a href='#'><span>Transformações Gráficas 2D</span></a>
+      			<ul>
+         			<li><a href='#'><span>Translação</span></a></li>
+         			<li><a href='#'><span>Variação de Escala</span></a></li>
+         			<li><a href='#'><span>Reflexão (linha)</span></a></li>
+         			<li class='last'><a href='#'><span>"Linha de varrimento"</span></a></li>
+      			</ul>
+   			</li>
+   			<li class='last'><a href='#'><span>Contacto</span></a></li>
+			</ul>
+		</div>
+		
+		<div id="menus">
+			
+		</div> <!--menus-->
+		
+		<!-- Canvas -->
+		<div id="canvaszone" >	
+			<canvas id="acg_canvas" width="600" height="600" style="border:1px solid #000000; cursor:crosshair;"> </canvas>
+		</div>
+		
+		<div id="textzone">
+			<b>Descrição do algoritmo</b>
+			
+			<p id="description"></p>
+			<p id="temp"></p>
+			<p id="rlb"></p>
+		</div>
+		
+	</body>
 </html>
-
-
