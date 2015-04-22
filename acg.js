@@ -102,17 +102,22 @@ var segsReta = [];
 // Inicializar canvas //
 ////////////////////////
  window.onload = function initialize() {
-	 canvas = document.getElementById("acg_canvas");
-	 ctx = canvas.getContext("2d");
-    canvas.addEventListener("mousedown",doMouseDown,false);
-    canvas.addEventListener("mousemove",mouseMove,false);
-    canvas.addEventListener("mouseout",mouseOut,false);
+	canvas = document.getElementById("acg_canvas");
+	ctx = canvas.getContext("2d");
+	canvas.addEventListener("mousedown",doMouseDown,false);
+	canvas.addEventListener("mousemove",mouseMove,false);
+	canvas.addEventListener("mouseout",mouseOut,false);
 }
-
 
 ////////////////////////////
 // Canvas Event handlers
 ////////////////////////////
+
+
+function mouseOut(event){
+	
+	document.getElementById("temp").innerHTML = "";
+}
 
 function mouseMove(event) {
 	
@@ -126,15 +131,14 @@ function mouseMove(event) {
 			//apagar reta temporaria
 			if(desenha){ 
 				temp = 1;
-				reta_bresenham_desenha();
+				reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y2});
 			}
 		
 			//desenhar a nova reta temporaria
 			temp = 0;
 			desenha=true;
-			reta_x2 = canvas_x;
-			reta_y2 = canvas_y;
-			reta_bresenham_desenha();
+			reta_x2 = canvas_x, reta_y2 = canvas_y;
+			reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y2});
 			break;
 		}
 		// circunferencia de bresenham temporaria
@@ -180,24 +184,48 @@ function mouseMove(event) {
 		}
 		
 		case 130:{
-			document.getElementById("temp").innerHTML = "Selecione o primeiro ponto<br>" + "x = "+ canvas_x + "<br>y = " + canvas_y;
+			document.getElementById("temp").innerHTML = "Introduzir Segmentos de Reta<br><br>Selecione o primeiro ponto<br>" + "x = "+ canvas_x + "<br>y = " + canvas_y;
 			
 			break;
 		}
 		case 131:{
-			document.getElementById("temp").innerHTML = "Selecione o segundo ponto<br>" + "x = "+ canvas_x + "<br>y = " + canvas_y;
+			document.getElementById("temp").innerHTML = "Introduzir Segmentos de Reta<br><br>Selecione o segundo ponto<br>" + "x = "+ canvas_x + "<br>y = " + canvas_y;
 			
+			if(desenha){
+				temp = 1;
+				reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y2});
+			}
 			
+			//desenhar a nova reta temporaria
+			temp = 0;
+			desenha=true;
+			reta_x2 = canvas_x, reta_y2 = canvas_y;
+			reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y2});
 			break;
 		}
 		case 135:{
-				document.getElementById("temp").innerHTML = "Selecione o primeiro ponto da janela de recorte...<br>x = "+ canvas_x + "<br>y = "+canvas_y;
-			
-			
+			document.getElementById("temp").innerHTML = "Selecione o primeiro ponto da janela de recorte<br>x = "+ canvas_x + "<br>y = "+canvas_y;
 			break;
 		}
 		case 136:{
-			document.getElementById("temp").innerHTML = "Selecione o segundo ponto da janela de recorte...<br>x = "+ canvas_x + "<br>y = " + canvas_y;
+			if(desenha){ 
+				temp = 1;
+				reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y1});
+				reta_bresenham_desenha({x:reta_x2, y:reta_y1},{x:reta_x2, y:reta_y2});
+				reta_bresenham_desenha({x:reta_x2, y:reta_y2},{x:reta_x1, y:reta_y2});
+				reta_bresenham_desenha({x:reta_x1, y:reta_y2},{x:reta_x1, y:reta_y1});
+			}
+		
+			//desenhar a nova reta temporaria
+			temp = 0;
+			desenha=true;
+			reta_x2 = canvas_x, reta_y2 = canvas_y;
+			reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y1});
+			reta_bresenham_desenha({x:reta_x2, y:reta_y1},{x:reta_x2, y:reta_y2});
+			reta_bresenham_desenha({x:reta_x2, y:reta_y2},{x:reta_x1, y:reta_y2});
+			reta_bresenham_desenha({x:reta_x1, y:reta_y2},{x:reta_x1, y:reta_y1});
+			
+			document.getElementById("temp").innerHTML = "Selecione o segundo ponto da janela de recorte<br>x = "+ canvas_x + "<br>y = " + canvas_y;
 			break;
 		}
 		default:
@@ -208,15 +236,6 @@ function mouseMove(event) {
 	
 	imprimePontos();
 }
-
-function mouseOut(event){
-	
-	canvas_x = event.layerX-4;
-   canvas_y = event.layerY-4;
-	document.getElementById("temp").innerHTML = "x = "+ "indefinido" + "<br>y = " + "indefinido";
-	
-}
-
 
 // Canvas click
 function doMouseDown(event) {
@@ -327,8 +346,7 @@ function doMouseDown(event) {
 
     case 31:
         //Ocorreu a marcação do segundo ponto 
-        reta_x2 = canvas_x;
-        reta_y2 = canvas_y;
+        reta_x2 = canvas_x, reta_y2 = canvas_y;
         
         pontosBre[pontosBre.length] = {x:reta_x2, y:reta_y2};
         
@@ -336,8 +354,8 @@ function doMouseDown(event) {
         
         //Desenha
         temp=-1;
-        reta_bresenham_desenha(); //coordenadas são globais
-        imprimePontosBre();
+        reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y2}); //coordenadas são globais
+        imprimePontosBre("B",pontosBre);
         
         //Regressa ao estado
         estado = 30;
@@ -593,30 +611,43 @@ function doMouseDown(event) {
 		case 130:{
 			ctx.beginPath();
 			//primeiro ponto
-			ctx.moveTo(canvas_x, canvas_y);
+			reta_x1 = canvas_x;
+			reta_y1 = canvas_y;
+			segsReta[segsReta.length] = {x:canvas_x, y:canvas_y};
+			
 			document.getElementById("temp").innerHTML = "Introduzir Segmentos de Reta<br><br>Selecione o segundo ponto<br>" + "x = "+ canvas_x + "<br>y = " + canvas_y;
 			
+			temp=0;
+			desenha = false;
 			estado = 131;
 			break;
 		}
 		case 131:{
-    		ctx.lineTo(canvas_x, canvas_y);
-    		ctx.strokeStyle = "red";
-    		ctx.fill();
-    		ctx.stroke();
+			reta_x2 = canvas_x;
+			reta_y2 = canvas_y; 
+			segsReta[segsReta.length] = {x:canvas_x, y:canvas_y};
     		
     		document.getElementById("rlb").innerHTML = "<button onclick=\"func()\" >Definir Janela de Recorte</button>";
-    		document.getElementById("temp").innerHTML = "x = "+ canvas_x + "<br>y = " + canvas_y;
+    		document.getElementById("temp").innerHTML = "Introduzir Segmentos de Reta<br><br>Selecione o primeiro ponto<br>x = "+ canvas_x + "<br>y = " + canvas_y;
+			
+			//Desenha
+        	temp=-1;
+			reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y2}); //coordenadas são globais
+			imprimePontosBre("LB",segsReta); 
+        
+			//Regressa ao estado
+			temp=0;
 			estado = 130;
 			break;
 		}
 		case 135:{
-			ctx.beginPath();
 			//primeiro ponto do retangulo de recorte
 			reta_x1 = canvas_x;
 			reta_y1 = canvas_y;
 			document.getElementById("temp").innerHTML = "Selecione o segundo ponto da janela de recorte...<br>x = "+ canvas_x + "<br>y = " + canvas_y;
 			
+			temp=0;
+			desenha = false;
 			estado = 136;
 			break;
 		}
@@ -625,7 +656,16 @@ function doMouseDown(event) {
 			reta_y2=canvas_y;
 			document.getElementById("temp").innerHTML = "x = "+ canvas_x + "<br>y = " + canvas_y;
 			
-			recorte_LiangBarsky(reta_x1, reta_y1,reta_x2, reta_y2);
+			//desenha
+			temp=-1;
+			//desenhar ou nao o retangulo de recorte ???
+			reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y1});
+			reta_bresenham_desenha({x:reta_x2, y:reta_y1},{x:reta_x2, y:reta_y2});
+			reta_bresenham_desenha({x:reta_x2, y:reta_y2},{x:reta_x1, y:reta_y2});
+			reta_bresenham_desenha({x:reta_x1, y:reta_y2},{x:reta_x1, y:reta_y1});
+			
+			recorte_LiangBarsky(segsReta, {x:reta_x1,y:reta_y1},{x:reta_x2,y:reta_y2});
+			temp=0;
 			estado = 130;
 			break;
 		}
@@ -638,6 +678,7 @@ function doMouseDown(event) {
 }
 
 
+//alterar mais tarde
 function func(){
 
 	estado=135;
@@ -652,19 +693,24 @@ function func(){
 
 /*
   -------------------------
-  Limpa a tela e alguns dados
+  Limpa a tela e reinicia as variaveis
   -------------------------
 */
 function menu_limpar()
 {
 	document.getElementById("description").innerHTML = "";
+	document.getElementById("temp").innerHTML = "";
+	document.getElementById("rlb").innerHTML = "";
 
 	ctx.clearRect(0, 0,canvas.width,canvas.height);
 
 	estado = 0;
+	desenha = true;
+	temp = 0;
 	pontosBre = [];
 	pontosCircBre = [];
 	pontosEtrig = [];
+	segsReta = [];
 }
 
 
@@ -687,14 +733,11 @@ function pixel_info()
     http://www.w3schools.com/tags/canvas_getimagedata.asp
 
     */
-
-    var c = document.getElementById("acg_canvas");
-    var ctx = c.getContext("2d");
+    
     var p = ctx.getImageData(canvas_x, canvas_y, 1, 1).data; 
     
-    x=document.getElementById("description");
-    x.innerHTML += "<br>Ponto (x,y)=(" + canvas_x + "," + canvas_y + ")";
-    x.innerHTML += "<br>R=" + p[0] + ", G=" + p[1] + ",B=" + p[2];
+    document.getElementById("description").innerHTML += "<br>Ponto (x,y)=(" + canvas_x + "," + canvas_y + ")";
+    document.getElementById("description").innerHTML += "<br>R=" + p[0] + ", G=" + p[1] + ",B=" + p[2];
 
     //console.log(p[0],p[1],p[2],p[3]);
 }
@@ -779,9 +822,9 @@ function menu_reta_bresenham(){
 }  
 
 // NOVA reta_bresenham_desenha()
-function reta_bresenham_desenha(){
+function reta_bresenham_desenha(A, B){
 	
-	var x1 = reta_x1, y1 = reta_y1, x2 = reta_x2, y2 = reta_y2;
+	var x1 = A.x, y1 = A.y, x2 = B.x, y2 = B.y;
 	
 	var dy = Math.abs(y2 - y1);
 	var dx = Math.abs(x2 - x1);
@@ -1148,6 +1191,7 @@ function menu_recorte_LiangBarsky(){
 	//Events
 	if(pontosBre.length>1){ //existe pelo menos uma reta desenhada
 		document.getElementById("temp").innerHTML = "Selecione o primeiro ponto da janela de recorte<br>" + document.getElementById("temp").innerHTML;
+		segsReta = pontosBre;
 		estado=135;
 	}
 	else{
@@ -1156,18 +1200,92 @@ function menu_recorte_LiangBarsky(){
 	}
 }
 
-function recorte_LiangBarsky(a,b,c,d){
+function recorte_LiangBarsky(retas, P1, P2){
+	//array de extremos de segmentos de reta
+	//p1 e p2 sao pontos opostos da janela de recorte
 	
-	console.log(a);
-	console.log(b);
-	console.log(c);
-	console.log(d);
+	var xMin=(P1.x<P2.x?P1.x:P2.x);
+	var yMin=(P1.y<P2.y?P1.y:P2.y);
+	var xMax=(P1.x>P2.x?P1.x:P2.x);
+	var yMax=(P1.y>P2.y?P1.y:P2.y);
+	
+	//apagar as retas
+	temp=1;
+	for(var i=0;i<retas.length-1; i+=2)
+		reta_bresenham_desenha( {x:retas[i].x, y:retas[i].y}, {x:retas[i+1].x, y:retas[i+1].y});
+	
+	//recortar retas
+	for(var i=0;i<retas.length-1; i+=2){ // percorrer cada reta
+		
+		var xDelta = retas[i+1].x - retas[i].x;
+		var yDelta = retas[i+1].y - retas[i].y;
+		var p, q, u1=0,u2=1;
+		
+		for(var j=0; j<4;j++){ // percorrer cada parede
+			if(j<2){
+				p=Math.pow(-1,j+1)*xDelta; // p1 ou p2
+				q=retas[i].x-xMin;  //q1
+				if(j==1)
+					q=xMax-retas[i].x; // q2
+			}
+			else{
+				p=Math.pow(-1,j+1)*yDelta; // p3 ou p4
+				q=retas[i].y-yMin;  //q3
+				if(j==3)
+					q=yMax-retas[i].y; // q4
+			}
+			
+			if(p==0){
+				if(q<0){
+					
+					
+					/// eliminar o elemento do array
+					
+					
+					retas[i+1].x=-1;
+					retas[i+1].y=-1;
+					retas[i].x=-1;
+					retas[i].y=-1;
+				}
+				break;
+			}
+			
+			var u = q/p;
+			if(p<0)// o segmento vem do exterior
+				u1=Math.max(u1,u);
+			else //p>0     // o segmento vem do interior
+				u2=Math.min(u2,u);
+		}
+		
+		if(u1>=0 && u2>=0 && u1<=u2){
+			retas[i+1].x=retas[i].x+Math.round(u2*xDelta);
+			retas[i+1].y=retas[i].y+Math.round(u2*yDelta);
+			retas[i].x=retas[i].x+Math.round(u1*xDelta);
+			retas[i].y=retas[i].y+Math.round(u1*yDelta);
+		}
+		else{ // caso o segmento nao seja visivel
+			
+			/// eliminar o elemento do array
+			
+			retas[i+1].x=-1;
+			retas[i+1].y=-1;
+			retas[i].x=-1;
+			retas[i].y=-1;
+		}
+	}// fim do for i
 	
 	
 	
+	//imprimir retas recortadas
+	temp=-1;
+	for(var i=0;i<retas.length-1; i+=2)
+		reta_bresenham_desenha( {x:retas[i].x, y:retas[i].y}, {x:retas[i+1].x, y:retas[i+1].y});
+	temp = 0;
 	
-	//definir retangulo e recortar as retas
+	//imprimePontosBre("LBN", retas);
+	
 }
+
 
 /*
 Recorte de retas pelo método de Cohen-Sutherland
@@ -1233,27 +1351,27 @@ function dist(A, B){
 
 //imprime todos os pontos armazenados em memoria
 function imprimePontos(){
-	imprimePontosBre();
+	imprimePontosBre("B", pontosBre);
 	imprimePtsCircBre();
 	imprimePtsET();
 }
 
 //imprime pontos das retas de bresenham
-function imprimePontosBre() {
+function imprimePontosBre(letra, pontos){
 	
-	for(var i=0; i<pontosBre.length-1;i=i+2){
-		var dx = pontosBre[i+1].x - pontosBre[i].x;
-		var dy = pontosBre[i+1].y - pontosBre[i].y;
+	for(var i=0; i<pontos.length-1;i=i+2){
+		var dx = pontos[i+1].x - pontos[i].x;
+		var dy = pontos[i+1].y - pontos[i].y;
 		
 		//apaga os anteriores
 		ctx.fillStyle = "white";
-		ctx.fillText(("B" + (i+1)), pontosBre[i].x + (dx>0?-15+(i>=9?-8:0):2), pontosBre[i].y + (dy>0?-2:2));
-		ctx.fillText(("B" + (i+2)), pontosBre[i+1].x + (dx>0?2:-15+(i>=9?-8:0)) , pontosBre[i+1].y + (dy>0?2:-2));
+		ctx.fillText((letra + (i+1)), pontos[i].x + (dx>0?-15+(i>=9?-8:0):2), pontos[i].y + (dy>0?-2:2));
+		ctx.fillText((letra + (i+2)), pontos[i+1].x + (dx>0?2:-15+(i>=9?-8:0)) , pontos[i+1].y + (dy>0?2:-2));
 
 		//imprime o novo estado
 		ctx.fillStyle = "black";
-		ctx.fillText(("B" + (i+1)), pontosBre[i].x + (dx>0?-15+(i>=9?-8:0):2), pontosBre[i].y + (dy>0?-2:2));
-		ctx.fillText(("B" + (i+2)), pontosBre[i+1].x + (dx>0?2:-15+(i>=9?-8:0)) , pontosBre[i+1].y + (dy>0?2:-2));
+		ctx.fillText((letra + (i+1)), pontos[i].x + (dx>0?-15+(i>=9?-8:0):2), pontos[i].y + (dy>0?-2:2));
+		ctx.fillText((letra + (i+2)), pontos[i+1].x + (dx>0?2:-15+(i>=9?-8:0)) , pontos[i+1].y + (dy>0?2:-2));
 	}
 }
 
