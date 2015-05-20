@@ -1,6 +1,6 @@
-/*
 
-// Para desenhar um ponto:
+/*
+    Para desenhar um ponto:
 
         var c = document.getElementById("acg_canvas");
         var ctx = c.getContext("2d");
@@ -44,6 +44,19 @@ Tabela de estados:
 
 80 = menu_elipse_trig
 
+90 = germen4
+
+100 = germen8 
+
+110 = desenho poligono (1ºclick)
+111 = desenho poligono (2ºclick)
+
+120 = varrimento (scan-line)
+
+130 = recorte LiangBarsky (1ºponto)
+131 = recorte LiangBarsky (2ºponto)
+135 = retangulo recorte LiangBarsky (1ºponto)
+136 = retangulo recorte LiangBarsky (2ºponto)
 
 
 A cada estado introduzido é necessário criar:
@@ -54,6 +67,9 @@ A cada estado introduzido é necessário criar:
 
 */
 
+///////////////////////
+// variaveis globais //
+///////////////////////
 
 var estado = 0
 
@@ -95,8 +111,6 @@ var npts; //num de pontos.
 //Recorte de retas
 var segsReta = [];
 
-//Recorte de poligonos
-
 
 ////////////////////////
 // Inicializar canvas //
@@ -115,7 +129,6 @@ var segsReta = [];
 
 
 function mouseOut(event){
-	
 	document.getElementById("temp").innerHTML = "";
 }
 
@@ -542,7 +555,8 @@ function doMouseDown(event) {
         //Desenha
         temp=-1;
         elipse_trig_desenha();
-		  imprimePtsET();
+		  //imprimePtsET();
+		  imprimePtsCirc_Elipse("ET", pontosEtrig);
 			
 		  //Regressa ao estado
         estado = 80;
@@ -609,7 +623,6 @@ function doMouseDown(event) {
     // Recorte Retas Liang-Barsky //
     ////////////////////////////////
 		case 130:{
-			ctx.beginPath();
 			//primeiro ponto
 			reta_x1 = canvas_x;
 			reta_y1 = canvas_y;
@@ -633,7 +646,7 @@ function doMouseDown(event) {
 			//Desenha
         	temp=-1;
 			reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y2}); //coordenadas são globais
-			imprimePontosBre("LB",segsReta); 
+			imprimePontosBre("L",segsReta); 
         
 			//Regressa ao estado
 			temp=0;
@@ -656,35 +669,38 @@ function doMouseDown(event) {
 			reta_y2=canvas_y;
 			document.getElementById("temp").innerHTML = "x = "+ canvas_x + "<br>y = " + canvas_y;
 			
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			
 			//desenha
-			temp=-1;
-			//desenhar ou nao o retangulo de recorte ???
+			temp=2;
+			//desenhar o retangulo de recorte
 			reta_bresenham_desenha({x:reta_x1, y:reta_y1},{x:reta_x2, y:reta_y1});
 			reta_bresenham_desenha({x:reta_x2, y:reta_y1},{x:reta_x2, y:reta_y2});
 			reta_bresenham_desenha({x:reta_x2, y:reta_y2},{x:reta_x1, y:reta_y2});
 			reta_bresenham_desenha({x:reta_x1, y:reta_y2},{x:reta_x1, y:reta_y1});
 			
 			recorte_LiangBarsky(segsReta, {x:reta_x1,y:reta_y1},{x:reta_x2,y:reta_y2});
+			
+			//imprimir retas recortadas
+			temp=-1;
+			for(var i=0;i<segsReta.length-1; i+=2)
+				if(segsReta[i]!=null&&segsReta[i+1]!=null)
+					reta_bresenham_desenha( {x:segsReta[i].x, y:segsReta[i].y}, {x:segsReta[i+1].x, y:segsReta[i+1].y});
+	
+			imprimePontosBre("R", segsReta);
+			
 			temp=0;
 			estado = 130;
 			break;
 		}
     
     default:
-        alert("Método não implementado, estado="+estado)
+        alert("Método não implementado, estado ="+estado);
 
     } //end of switch(estado)
     
 }
 
-
-//alterar mais tarde
-function func(){
-
-	estado=135;
-	document.getElementById("temp").innerHTML = "Selecione o primeiro ponto da janela de recorte...<br>"+document.getElementById("temp").innerHTML;
-	document.getElementById("rlb").innerHTML = "";
-}
 
 /////////////////////
 //  Tela e pixeis  //
@@ -696,8 +712,7 @@ function func(){
   Limpa a tela e reinicia as variaveis
   -------------------------
 */
-function menu_limpar()
-{
+function menu_limpar(){
 	document.getElementById("description").innerHTML = "";
 	document.getElementById("temp").innerHTML = "";
 	document.getElementById("rlb").innerHTML = "";
@@ -932,21 +947,20 @@ function menu_circ_bresenham()
 }  
 
 function circ_bresenham_desenha(){
-
-	var r = Math.floor(Math.sqrt( Math.pow( centro_x - pcirc_x, 2) + Math.pow( centro_y - pcirc_y, 2)  ));
+	var r=Math.floor(Math.sqrt(Math.pow(centro_x-pcirc_x,2)+Math.pow(centro_y-pcirc_y,2)));
 	
-	var x = 0;
-	var y = r;
-	var d = (3-2*r);
+	var x=0;
+	var y=r;
+	var d=3-2*r;
 	
 	confDesenho();
 	
-	while( x <= y ){
+	while(x<=y){
 		if(d<0)
-			d = d + 4*x + 6;
+			d=d+4*x+6;
 		else{
-			d = d + 4*(x-y) + 10;
-			y = y-1;
+			d=d+4*(x-y)+10;
+			y--;
 		}
 		
 		pintaPixel( x + centro_x, y + centro_y);
@@ -1014,7 +1028,8 @@ function elipse_trig_desenha(){
 	var a = Math.abs(x2-x1);
 	var b = Math.abs(y2-y1);
 	var ang=0;
-	var angFim = 11/7; // Pi/2
+	//var angFim = 11/7; // Pi/2
+	var angFim = Math.PI/2;
     
 	confDesenho();
 	while(ang <= angFim+0.005){
@@ -1209,16 +1224,14 @@ function recorte_LiangBarsky(retas, P1, P2){
 	var xMax=(P1.x>P2.x?P1.x:P2.x);
 	var yMax=(P1.y>P2.y?P1.y:P2.y);
 	
-	//apagar as retas
-	temp=1;
-	for(var i=0;i<retas.length-1; i+=2)
-		reta_bresenham_desenha( {x:retas[i].x, y:retas[i].y}, {x:retas[i+1].x, y:retas[i+1].y});
-	
 	//recortar retas
 	for(var i=0;i<retas.length-1; i+=2){ // percorrer cada reta
 		
-		var xDelta = retas[i+1].x - retas[i].x;
-		var yDelta = retas[i+1].y - retas[i].y;
+		if(retas[i]==null||retas[i+1]==null)
+			continue;
+		
+		var xDelta = retas[i+1].x-retas[i].x;
+		var yDelta = retas[i+1].y-retas[i].y;
 		var p, q, u1=0,u2=1;
 		
 		for(var j=0; j<4;j++){ // percorrer cada parede
@@ -1236,17 +1249,81 @@ function recorte_LiangBarsky(retas, P1, P2){
 			}
 			
 			if(p==0){
-				if(q<0){
-					
-					
-					/// eliminar o elemento do array
-					
-					
-					retas[i+1].x=-1;
-					retas[i+1].y=-1;
-					retas[i].x=-1;
-					retas[i].y=-1;
+				if(q<=0){ //segmento totalmente invisivel
+					//apagar os dois pontos do array
+					delete retas[i];
+					delete retas[i+1];
 				}
+				else{
+					if(xDelta==0){  //reta vertical
+						if(retas[i].y>yMin && retas[i].y<yMax){ // ponto inicial visivel
+							if(retas[i+1].y>yMin && retas[i+1].y<yMax){ } // ponto final visivel
+							else{ // segmento parcialmente visivel (ponto inicial visivel e final invisivel)
+								if(yDelta>0)
+									retas[i+1].y=yMax;
+								else
+									retas[i+1].y=yMin;
+							}
+						}
+						else{
+							if(retas[i+1].y>yMin && retas[i+1].y<yMax){ // ponto final visivel
+								if(yDelta>0)
+									retas[i].y=yMin;
+								else
+									retas[i].y=yMax;
+							}
+							else{
+								if(retas[i].y<=yMin&&retas[i+1].y>=yMax){
+									retas[i].y=yMin;
+									retas[i+1].y=yMax;
+								}
+								else if(retas[i].y>=yMax&&retas[i+1].y<=yMin){
+									retas[i].y=yMax;
+									retas[i+1].y=yMin;
+								}
+								else{ //segmento totalmente invisivel
+									delete retas[i];
+									delete retas[i+1];
+								}
+							}
+						}
+					}
+					if(yDelta==0){  //reta horizontal
+						if(retas[i].x>xMin && retas[i].x<xMax){ // ponto inicial visivel
+							if(retas[i+1].x>xMin && retas[i+1].x<xMax){ } // ponto final visivel
+							else{ // segmento parcialmente visivel (ponto inicial visivel e final invisivel)
+								if(xDelta>0)
+									retas[i+1].x=xMax;
+								else
+									retas[i+1].x=xMin;
+							}
+						}
+						else{
+							if(retas[i+1].x>xMin && retas[i+1].x<xMax){ // ponto final visivel
+								if(xDelta>0)
+									retas[i].x=xMin;
+								else
+									retas[i].x=xMax;
+							}
+							else{
+								if(retas[i].x<=xMin&&retas[i+1].x>=xMax){
+									retas[i].x=xMin;
+									retas[i+1].x=xMax;
+								}
+								else if(retas[i].x>=xMax&&retas[i+1].x<=xMin){
+									retas[i].x=xMax;
+									retas[i+1].x=xMin;
+								}
+								else{ //segmento totalmente invisivel
+									delete retas[i];
+									delete retas[i+1];
+								}
+							}
+						}
+					}
+				}
+				u1=0;
+				u2=1;
 				break;
 			}
 			
@@ -1257,34 +1334,20 @@ function recorte_LiangBarsky(retas, P1, P2){
 				u2=Math.min(u2,u);
 		}
 		
-		if(u1>=0 && u2>=0 && u1<=u2){
-			retas[i+1].x=retas[i].x+Math.round(u2*xDelta);
-			retas[i+1].y=retas[i].y+Math.round(u2*yDelta);
-			retas[i].x=retas[i].x+Math.round(u1*xDelta);
-			retas[i].y=retas[i].y+Math.round(u1*yDelta);
-		}
-		else{ // caso o segmento nao seja visivel
-			
-			/// eliminar o elemento do array
-			
-			retas[i+1].x=-1;
-			retas[i+1].y=-1;
-			retas[i].x=-1;
-			retas[i].y=-1;
-		}
+		if(xDelta!=0 && yDelta!=0)
+			if(u1>=0 && u2>=0 && u1<=u2){
+				retas[i+1].x=retas[i].x+Math.round(u2*xDelta);
+				retas[i+1].y=retas[i].y+Math.round(u2*yDelta);
+				retas[i].x=retas[i].x+Math.round(u1*xDelta);
+				retas[i].y=retas[i].y+Math.round(u1*yDelta);
+			}
+			else{ // caso o segmento nao seja visivel
+				/// eliminar o elemento do array
+				delete retas[i];
+				delete retas[i+1];
+			}
 	}// fim do for i
-	
-	
-	
-	//imprimir retas recortadas
-	temp=-1;
-	for(var i=0;i<retas.length-1; i+=2)
-		reta_bresenham_desenha( {x:retas[i].x, y:retas[i].y}, {x:retas[i+1].x, y:retas[i+1].y});
-	temp = 0;
-	
-	//imprimePontosBre("LBN", retas);
-	
-}
+}// fim da funcao recorte
 
 
 /*
@@ -1323,20 +1386,33 @@ function recorte_Poligonos(){
 // altera as configurações de desenho
 function confDesenho(){
 	
-	if(temp == 1){  //apagar
-		ctx.globalCompositeOperation = "xor";
-		ctx.fillStyle = "red";
-		return;
+	switch(temp){
+		case -1:{  //desenho definitivo
+			ctx.globalCompositeOperation="source-over";  // por definicao
+			ctx.fillStyle="red";
+			break;
+		}
+		case 0:{  //temporario
+			ctx.globalCompositeOperation="xor";
+			ctx.fillStyle="gray";
+			return;
+		}
+		case 1:{  //apagar
+			ctx.globalCompositeOperation="xor";
+			ctx.fillStyle="red";
+			return;
+		}
+		case 2:{
+			ctx.globalCompositeOperation="source-over";
+			ctx.fillStyle="blue";
+			break;
+		}
+		default:{
+			ctx.globalCompositeOperation="source-over"; //por defeito
+			ctx.fillStyle="black";
+			break;
+		}
 	}
-	if(temp == 0){  //temporario
-		ctx.globalCompositeOperation = "xor";
-		ctx.fillStyle = "gray";
-		return;
-	}
-	
-	//desenho final
-	ctx.globalCompositeOperation = "source-over";  // por definicao
-	ctx.fillStyle = "red";
 }
 
 //pinta um determinado pixel
@@ -1352,14 +1428,19 @@ function dist(A, B){
 //imprime todos os pontos armazenados em memoria
 function imprimePontos(){
 	imprimePontosBre("B", pontosBre);
-	imprimePtsCircBre();
-	imprimePtsET();
+	imprimePontosBre("L", segsReta);
+	imprimePtsCirc_Elipse("CB", pontosCircBre);
+	imprimePtsCirc_Elipse("ET", pontosEtrig);
 }
 
 //imprime pontos das retas de bresenham
 function imprimePontosBre(letra, pontos){
+	if(pontos==null)
+		return;	
 	
 	for(var i=0; i<pontos.length-1;i=i+2){
+		if(pontos[i]==null||pontos[i+1]==null)
+			continue;
 		var dx = pontos[i+1].x - pontos[i].x;
 		var dy = pontos[i+1].y - pontos[i].y;
 		
@@ -1376,34 +1457,26 @@ function imprimePontosBre(letra, pontos){
 }
 
 //imprime os centros das circunferencias de bresenham
-function imprimePtsCircBre(){
-	for(var i=0; i<pontosCircBre.length;i++){
+function imprimePtsCirc_Elipse(letra, pontos){
+	if(pontos==null)
+		return;
+	for(var i=0; i<pontos.length;i++){
 		
 		//apaga os anteriores
 		ctx.fillStyle = "white";
-		ctx.fillText(("CB" + (i+1)), pontosCircBre[i].x + 2, pontosCircBre[i].y - 3);
+		ctx.fillText((letra + (i+1)), pontos[i].x + 2, pontos[i].y - 3);
 
 		//imprime o novo estado
 		ctx.fillStyle = "black";
-		ctx.fillText(("CB" + (i+1)), pontosCircBre[i].x + 2, pontosCircBre[i].y - 3);
+		ctx.fillText((letra + (i+1)), pontos[i].x + 2, pontos[i].y - 3);
 		
-		pintaPixel(pontosCircBre[i].x, pontosCircBre[i].y);
+		pintaPixel(pontos[i].x, pontos[i].y); // pintar o centro (nao funciona bem)
 	}
 }
 
-//imprime os centros das elipses em modo trigonometrico
-function imprimePtsET(){
-	for(var i=0; i<pontosEtrig.length;i++){
-		//apaga os anteriores
-		ctx.fillStyle = "white";
-		ctx.fillText(("ET" + (i+1)), pontosEtrig[i].x + 2, pontosEtrig[i].y - 3);
-
-		//imprime o novo estado
-		ctx.fillStyle = "black";
-		ctx.fillText(("ET" + (i+1)), pontosEtrig[i].x + 2, pontosEtrig[i].y - 3);
-		
-		pintaPixel(pontosEtrig[i].x, pontosEtrig[i].y);
-	}
+// funcao do botao de recorte de Liang-Barsky
+function func(){
+	estado=135;
+	document.getElementById("temp").innerHTML = "Selecione o primeiro ponto da janela de recorte...<br>"+document.getElementById("temp").innerHTML;
+	document.getElementById("rlb").innerHTML = "";
 }
-
-
